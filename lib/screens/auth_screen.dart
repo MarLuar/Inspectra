@@ -100,7 +100,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isLogin ? 'Sign In' : 'Sign Up'),
+        title: Text(_isLogin ? 'Sign In' : 'Sign Up', style: TextStyle(fontWeight: FontWeight.w700)),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
@@ -149,7 +149,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: Text(_isLogin ? 'Sign In' : 'Sign Up'),
+                  child: Text(_isLogin ? 'Sign In' : 'Sign Up', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
                 ),
               const SizedBox(height: 16),
               TextButton(
@@ -162,6 +162,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   _isLogin
                       ? 'Don\'t have an account? Sign Up'
                       : 'Already have an account? Sign In',
+                  style: TextStyle(fontWeight: FontWeight.w500),
                 ),
               ),
               const SizedBox(height: 16),
@@ -170,7 +171,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   // Skip authentication and go to home screen
                   Navigator.of(context).pushReplacementNamed('/home');
                 },
-                child: const Text('Continue without account'),
+                child: Text('Continue without account', style: TextStyle(fontWeight: FontWeight.w500)),
               ),
             ],
           ),

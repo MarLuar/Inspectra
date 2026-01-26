@@ -85,7 +85,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.projectName ?? 'Folder Detail'),
+        title: Text(widget.projectName ?? 'Folder Detail', style: TextStyle(fontWeight: FontWeight.w700)),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
@@ -95,40 +95,40 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               PopupMenuItem(
                 value: 'view_qr',
                 child: Row(
-                  children: const [
+                  children: [
                     Icon(Icons.qr_code, color: Colors.blue),
                     SizedBox(width: 8),
-                    Text('View QR Code'),
+                    Text('View QR Code', style: TextStyle(fontWeight: FontWeight.w500)),
                   ],
                 ),
               ),
               PopupMenuItem(
                 value: 'rename',
                 child: Row(
-                  children: const [
+                  children: [
                     Icon(Icons.edit, color: Colors.blue),
                     SizedBox(width: 8),
-                    Text('Rename Folder'),
+                    Text('Rename Folder', style: TextStyle(fontWeight: FontWeight.w500)),
                   ],
                 ),
               ),
               PopupMenuItem(
                 value: 'add_location',
                 child: Row(
-                  children: const [
+                  children: [
                     Icon(Icons.location_on, color: Colors.blue),
                     SizedBox(width: 8),
-                    Text('Add Location'),
+                    Text('Add Location', style: TextStyle(fontWeight: FontWeight.w500)),
                   ],
                 ),
               ),
               PopupMenuItem(
                 value: 'delete',
                 child: Row(
-                  children: const [
+                  children: [
                     Icon(Icons.delete, color: Colors.red),
                     SizedBox(width: 8),
-                    Text('Delete Folder', style: TextStyle(color: Colors.red)),
+                    Text('Delete Folder', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500)),
                   ],
                 ),
               ),
@@ -270,13 +270,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               ),
 
               // Categories section
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
                   'Categories',
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -299,13 +299,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               ),
 
               // Documents section
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
                   'Recent Documents',
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -504,11 +504,11 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
+                    Text(
                       'Project QR Code',
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -528,7 +528,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: const Text('Close'),
+                      child: Text('Close', style: TextStyle(fontWeight: FontWeight.w500)),
                     ),
                   ],
                 ),
@@ -556,7 +556,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Rename Folder'),
+          title: Text('Rename Folder', style: TextStyle(fontWeight: FontWeight.w600)),
           content: TextField(
             controller: controller,
             decoration: const InputDecoration(hintText: "Enter new folder name"),
@@ -566,7 +566,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(fontWeight: FontWeight.w500)),
             ),
             TextButton(
               onPressed: () {
@@ -574,7 +574,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   Navigator.of(context).pop(controller.text.trim());
                 }
               },
-              child: const Text('Rename'),
+              child: Text('Rename', style: TextStyle(fontWeight: FontWeight.w500)),
             ),
           ],
         );
@@ -650,7 +650,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Add Location'),
+          title: Text('Add Location', style: TextStyle(fontWeight: FontWeight.w600)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -673,13 +673,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(fontWeight: FontWeight.w500)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(controller.text.trim());
               },
-              child: const Text('Save'),
+              child: Text('Save', style: TextStyle(fontWeight: FontWeight.w500)),
             ),
           ],
         );
@@ -739,7 +739,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Shareable Link'),
+            title: Text('Shareable Link', style: TextStyle(fontWeight: FontWeight.w600)),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -757,7 +757,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('Close'),
+                child: Text('Close', style: TextStyle(fontWeight: FontWeight.w500)),
               ),
               TextButton(
                 onPressed: () async {
@@ -765,7 +765,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   // For now, just close the dialog
                   Navigator.of(context).pop();
                 },
-                child: const Text('Copy'),
+                child: Text('Copy', style: TextStyle(fontWeight: FontWeight.w500)),
               ),
             ],
           );
@@ -787,7 +787,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Share with Permissions'),
+          title: Text('Share with Permissions', style: TextStyle(fontWeight: FontWeight.w600)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -849,7 +849,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(fontWeight: FontWeight.w500)),
             ),
             TextButton(
               onPressed: () {
@@ -860,7 +860,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   });
                 }
               },
-              child: const Text('Share'),
+              child: Text('Share', style: TextStyle(fontWeight: FontWeight.w500)),
             ),
           ],
         );
@@ -904,14 +904,14 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete Folder'),
+          title: Text('Delete Folder', style: TextStyle(fontWeight: FontWeight.w600)),
           content: Text('Are you sure you want to delete "${widget.projectName}"?\n\nThis will permanently delete all documents in this folder.'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Cancel
               },
-              child: const Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(fontWeight: FontWeight.w500)),
             ),
             TextButton(
               onPressed: () async {
@@ -946,7 +946,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   Navigator.of(context).pop(); // Close dialog
                 }
               },
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              child: Text('Delete', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500)),
             ),
           ],
         );

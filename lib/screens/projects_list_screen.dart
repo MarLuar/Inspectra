@@ -47,7 +47,7 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Create New Folder'),
+          title: Text('Create New Folder', style: TextStyle(fontWeight: FontWeight.w600)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -70,7 +70,7 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(fontWeight: FontWeight.w500)),
             ),
             TextButton(
               onPressed: () {
@@ -81,7 +81,7 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
                   });
                 }
               },
-              child: const Text('Create'),
+              child: Text('Create', style: TextStyle(fontWeight: FontWeight.w500)),
             ),
           ],
         );
@@ -125,7 +125,7 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Folders'),
+        title: Text('Folders', style: TextStyle(fontWeight: FontWeight.w700)),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
@@ -146,21 +146,21 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'date_newest',
-                child: Text('Date (Newest)'),
+                child: Text('Date (Newest)', style: TextStyle(fontWeight: FontWeight.w500)),
               ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'date_oldest',
-                child: Text('Date (Oldest)'),
+                child: Text('Date (Oldest)', style: TextStyle(fontWeight: FontWeight.w500)),
               ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'name_az',
-                child: Text('Name (A-Z)'),
+                child: Text('Name (A-Z)', style: TextStyle(fontWeight: FontWeight.w500)),
               ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'name_za',
-                child: Text('Name (Z-A)'),
+                child: Text('Name (Z-A)', style: TextStyle(fontWeight: FontWeight.w500)),
               ),
             ],
           ),
@@ -178,7 +178,7 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
                   child: Text(
                     'No folders yet.\nTap the + button to create one.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
                 )
               : RefreshIndicator(

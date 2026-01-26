@@ -70,4 +70,4 @@ The app follows a clean architecture pattern with:
 
 ## Testing
 
-The app is designed to work completely offline. All data is stored locally on the device, ensuring functionality without internet connectivity.
+The app is designed to work completely offline. All data is stored locally on the device, ensuring functionality without internet connectivity.# Inspectra

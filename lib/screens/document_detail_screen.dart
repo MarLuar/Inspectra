@@ -9,7 +9,9 @@ import '../services/project_organization_service.dart';
 import '../services/document_sharing_service.dart';
 import '../services/cloud_sync_service.dart';
 import '../services/database_service.dart';
+import '../services/document_qr_code_service.dart';
 import 'image_enhancement_screen.dart';
+import 'qr_scanner_screen.dart';
 
 class DocumentDetailScreen extends StatefulWidget {
   final Document document;
@@ -51,6 +53,10 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
                 _shareWithPermissions();
               } else if (result == 'move') {
                 _moveToCategory();
+              } else if (result == 'view_qr_code') {
+                _viewQrCode();
+              } else if (result == 'generate_qr_code') {
+                _generateQrCode();
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -90,6 +96,27 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
                     child: Text('Convert to Text'),
                   ),
                 ],
+              const PopupMenuDivider(),
+              PopupMenuItem<String>(
+                value: 'view_qr_code',
+                child: Row(
+                  children: [
+                    Icon(Icons.qr_code, size: 16),
+                    const SizedBox(width: 8),
+                    const Text('View QR Code'),
+                  ],
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'generate_qr_code',
+                child: Row(
+                  children: [
+                    Icon(Icons.qr_code_2, size: 16),
+                    const SizedBox(width: 8),
+                    const Text('Generate QR Code'),
+                  ],
+                ),
+              ),
               const PopupMenuDivider(),
               const PopupMenuItem<String>(
                 value: 'delete',
@@ -733,6 +760,145 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _viewQrCode() async {
+    if (widget.document.qrCodePath != null && widget.document.qrCodePath!.isNotEmpty) {
+      // Show existing QR code
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              width: 300,
+              height: 350,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Document QR Code',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: Image.file(File(widget.document.qrCodePath!)),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Close'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    } else {
+      // Document doesn't have a QR code, ask if user wants to generate one
+      _showGenerateQrCodeDialog();
+    }
+  }
+
+  void _generateQrCode() async {
+    await _generateAndSaveQrCode();
+  }
+
+  Future<void> _generateAndSaveQrCode() async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: 20),
+                const Text("Generating QR Code..."),
+                const SizedBox(height: 10),
+                Text(
+                  "Document: ${widget.document.name}",
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      // Generate QR code
+      final qrCodeService = DocumentQrCodeService();
+      final qrCodePath = await qrCodeService.generateDocumentQrCode(
+        document: widget.document,
+      );
+
+      // Update document with QR code path
+      final projectService = ProjectOrganizationService();
+      await projectService.updateDocumentQrCode(widget.document.id, qrCodePath);
+
+      // Close loading dialog
+      Navigator.of(context).pop();
+
+      // Update the widget's document
+      setState(() {
+        // Refresh the UI to reflect the new QR code
+      });
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('QR Code generated successfully!'),
+          action: SnackBarAction(
+            label: 'View',
+            onPressed: () {
+              _viewQrCode();
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      // Close loading dialog if still open
+      if (Navigator.canPop(context)) {
+        Navigator.of(context).pop();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error generating QR code: $e')),
+      );
+    }
+  }
+
+  void _showGenerateQrCodeDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('QR Code Not Found'),
+          content: const Text('This document does not have a QR code yet. Would you like to generate one?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                _generateAndSaveQrCode();
+              },
+              child: const Text('Generate'),
             ),
           ],
         );

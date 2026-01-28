@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../services/project_organization_service.dart';
 import '../services/qr_code_generator_service.dart';
+import '../services/document_qr_code_service.dart';
 import '../models/project_model.dart';
 import 'project_detail_screen.dart';
+import 'document_detail_screen.dart';
 
 class QrScannerScreen extends StatefulWidget {
   const QrScannerScreen({Key? key}) : super(key: key);
@@ -111,11 +113,12 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
     if (rawValue == null) return;
 
     // Use the QR code generator service to validate the QR code format
-    final qrService = QrCodeGeneratorService();
+    final projectQrService = QrCodeGeneratorService();
+    final documentQrService = DocumentQrCodeService();
 
-    // Check if the scanned code is in the expected format: INSPROJECT:project-id|project-name
-    if (qrService.isValidProjectQrCode(rawValue)) {
-      final projectData = qrService.extractProjectFromQrCode(rawValue);
+    // Check if the scanned code is a project QR code
+    if (projectQrService.isValidProjectQrCode(rawValue)) {
+      final projectData = projectQrService.extractProjectFromQrCode(rawValue);
       if (projectData != null) {
         final projectId = projectData['id'] ?? '';
         final projectName = projectData['name'] ?? '';
@@ -124,8 +127,22 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       } else {
         _showErrorDialog('Invalid QR code format. Could not extract project information.');
       }
-    } else {
-      _showErrorDialog('This QR code does not contain project information.\n\nLook for QR codes labeled "INSPROJECT:"');
+    }
+    // Check if the scanned code is a document QR code
+    else if (documentQrService.isValidDocumentQrCode(rawValue)) {
+      final documentData = documentQrService.extractDocumentFromQrCode(rawValue);
+      if (documentData != null) {
+        final documentId = documentData['id'] ?? '';
+        final documentName = documentData['name'] ?? '';
+        final projectId = documentData['project_id'] ?? '';
+
+        await _openDocument(documentId, documentName, projectId);
+      } else {
+        _showErrorDialog('Invalid QR code format. Could not extract document information.');
+      }
+    }
+    else {
+      _showErrorDialog('This QR code does not contain project or document information.\n\nLook for QR codes labeled "INSPROJECT:" or "INSDOC:"');
     }
   }
 
@@ -178,6 +195,60 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
         _isProcessing = false;
       });
       _showErrorDialog('Error opening project: $e');
+    }
+  }
+
+  Future<void> _openDocument(String documentId, String documentName, String projectId) async {
+    if (_isProcessing) return; // Prevent multiple simultaneous attempts
+
+    setState(() {
+      _isProcessing = true;
+    });
+
+    try {
+      final projectService = ProjectOrganizationService();
+
+      // First, find the document by ID
+      Document? document = await projectService.getDocumentById(documentId);
+
+      // If document not found by ID, try to find by name and project ID
+      if (document == null) {
+        final documents = await projectService.getDocumentsForProject(projectId);
+        document = documents.firstWhere(
+          (d) => d.name == documentName && d.projectId == projectId,
+          orElse: () => Document(
+            id: '',
+            projectId: '',
+            name: '',
+            path: '',
+            category: '',
+            createdAt: DateTime.now(),
+            fileType: ''
+          ),
+        );
+      }
+
+      if (document != null && document.id.isNotEmpty) {
+        // Stop the camera before navigating
+        await cameraController.stop();
+
+        // Navigate to the document detail screen
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => DocumentDetailScreen(document: document!),
+          ),
+        );
+      } else {
+        setState(() {
+          _isProcessing = false;
+        });
+        _showErrorDialog('Document "$documentName" not found in your list. Please make sure the document exists.');
+      }
+    } catch (e) {
+      setState(() {
+        _isProcessing = false;
+      });
+      _showErrorDialog('Error opening document: $e');
     }
   }
 

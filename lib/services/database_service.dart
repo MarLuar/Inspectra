@@ -16,7 +16,7 @@ class DatabaseService {
     print('Database path: $path'); // Debug logging
     return await openDatabase(
       path,
-      version: 3, // Incremented version to force schema update
+      version: 4, // Incremented version to force schema update
       onCreate: _createTables,
       onUpgrade: _onUpgrade, // Add upgrade handler
     );
@@ -38,6 +38,16 @@ class DatabaseService {
       } catch (e) {
         // Column might already exist, ignore error
         print('Error adding location column: $e');
+      }
+    }
+
+    if (oldVersion < 4) {
+      // If upgrading from version 3 to 4, add qr_code_path column to documents table
+      try {
+        await db.execute('ALTER TABLE documents ADD COLUMN qr_code_path TEXT');
+      } catch (e) {
+        // Column might already exist, ignore error
+        print('Error adding qr_code_path column: $e');
       }
     }
   }
@@ -65,6 +75,7 @@ class DatabaseService {
         category TEXT NOT NULL,
         created_at INTEGER NOT NULL,
         file_type TEXT NOT NULL,
+        qr_code_path TEXT,
         FOREIGN KEY (project_id) REFERENCES projects (id)
       )
     ''');

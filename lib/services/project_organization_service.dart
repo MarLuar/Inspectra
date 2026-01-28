@@ -222,25 +222,10 @@ class ProjectOrganizationService {
         }
       }
 
-      // Create document record in database
-      final newDocument = Document(
-        id: generateProjectId(),
-        projectId: projectId,
-        name: documentName,
-        path: destinationPath,
-        category: category,
-        createdAt: DateTime.now(),
-        fileType: fileType,
-      );
-
-      print('Attempting to insert document into database: ${newDocument.toJson()}');
-      await _dbService.insertDocument(newDocument);
-      print('Document inserted into database successfully');
-
       // Sync document to cloud if authenticated
       if (_cloudSyncService.isAuthenticated) {
         try {
-          await _cloudSyncService.syncDocumentToCloud(newDocument);
+          await _cloudSyncService.syncDocumentToCloud(document);
         } catch (e) {
           print('Error syncing document to cloud: $e');
         }
@@ -252,6 +237,39 @@ class ProjectOrganizationService {
       print('Stack trace: ${StackTrace.current}');
       rethrow;
     }
+  }
+
+  /// Updates a document's QR code path in the database
+  Future<void> updateDocumentQrCode(String documentId, String qrCodePath) async {
+    final document = await _dbService.getDocumentById(documentId);
+    if (document != null) {
+      final updatedDocument = Document(
+        id: document.id,
+        projectId: document.projectId,
+        name: document.name,
+        path: document.path,
+        category: document.category,
+        createdAt: document.createdAt,
+        fileType: document.fileType,
+        qrCodePath: qrCodePath,
+      );
+
+      await _dbService.updateDocument(updatedDocument);
+
+      // Sync to cloud if authenticated
+      if (_cloudSyncService.isAuthenticated) {
+        try {
+          await _cloudSyncService.syncDocumentToCloud(updatedDocument);
+        } catch (e) {
+          print('Error syncing updated document to cloud: $e');
+        }
+      }
+    }
+  }
+
+  /// Gets a document by ID
+  Future<Document?> getDocumentById(String documentId) async {
+    return await _dbService.getDocumentById(documentId);
   }
 
   /// Gets all documents in a specific project from the database

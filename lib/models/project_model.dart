@@ -70,6 +70,7 @@ class Document {
   final String category; // e.g., 'Blueprints', 'Site_Inspections', 'Reports'
   final DateTime createdAt;
   final String fileType; // 'image' or 'pdf'
+  final String? qrCodePath; // Path to the QR code image file
 
   Document({
     required this.id,
@@ -79,6 +80,7 @@ class Document {
     required this.category,
     required this.createdAt,
     required this.fileType,
+    this.qrCodePath,
   });
 
   Map<String, dynamic> toJson() {
@@ -90,6 +92,7 @@ class Document {
       'category': category,
       'created_at': createdAt.millisecondsSinceEpoch,
       'file_type': fileType,
+      'qr_code_path': qrCodePath,
     };
   }
 
@@ -102,6 +105,7 @@ class Document {
       category: json['category'],
       createdAt: DateTime.fromMillisecondsSinceEpoch(json['created_at']),
       fileType: json['file_type'],
+      qrCodePath: json['qr_code_path'],
     );
   }
 
@@ -115,6 +119,7 @@ class Document {
       'category': category,
       'created_at': createdAt.millisecondsSinceEpoch,
       'file_type': fileType,
+      'qr_code_path': qrCodePath,
     };
   }
 
@@ -128,6 +133,7 @@ class Document {
       category: data['category'] ?? '',
       createdAt: DateTime.fromMillisecondsSinceEpoch(data['created_at'] ?? DateTime.now().millisecondsSinceEpoch),
       fileType: data['file_type'] ?? '',
+      qrCodePath: data['qr_code_path'],
     );
   }
 }

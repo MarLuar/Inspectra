@@ -1,73 +1,111 @@
-# InSpectra - Document Management System
+Inspectra v1.05 - QR-Linked Web-Based Documentation and Site Inspection Management System
 
-InSpectra is a Flutter-based mobile application for managing construction documents (blueprints, reports). The app enables users to scan documents, enhance images, convert them to PDFs, and organize them into local project folders.
+  Comprehensive Inspection Management Platform with ESP32 Hardware Integration
 
-## Features
+  Inspectra is a cutting-edge web-based application designed for site inspection professionals, featuring seamless
+  integration with ESP32 hardware devices and Supabase cloud storage for efficient project management and document
+  synchronization.
 
-### Document Scanning & Edge Detection
-- Integrated `google_mlkit_document_scanner` for native-like scanning experience
-- Automatic edge detection and perspective correction
-- Manual cropping capabilities
+  What's New in v1.05:
+   - Fixed QR Code Display Issue: Resolved the critical ESP32 QR code generation problem where QR codes weren't displaying
+     properly in the web interface
+   - Enhanced Supabase Integration: Improved handling of Supabase-stored QR code files with proper URL redirection
+   - Improved File Sync: Enhanced synchronization between ESP32 and Supabase storage systems
+   - Better Error Handling: Added robust error handling for missing QR codes and network issues
+   - Stable ESP32 Firmware: Fixed memory allocation and watchdog timer issues in the ESP32 firmware
 
-### Image Enhancement Engine
-- Adjust brightness, contrast, and sharpness of scanned images
-- Rotate and crop functionality
-- Real-time preview of enhancements
+  Key Features:
 
-### File Conversion & PDF Generation
-- JPEG to PDF conversion workflow
-- High-resolution quality preservation (up to 1200 dpi equivalent)
-- Optimized for readable blueprints and documents
+  Web Application
+   - Intuitive interface for site inspection documentation
+   - Real-time project management and documentation
+   - Document scanning and categorization tools
+   - Offline capability with automatic sync when online
+   - Photo capture and annotation tools for inspection reports
 
-### Local Project Organization
-- Hierarchical local file system
-- "Add Project" functionality with automatic QR code generation
-- Automatic organization into sub-folders like `/Project_Name/Blueprints/` or `/Project_Name/Site_Inspections/`
+  ESP32 Hardware Integration
+   - Local file storage and management
+   - WiFi connectivity for direct device access
+   - Automatic synchronization with Supabase cloud storage
+   - QR code generation for quick project access
+   - Web-based file management interface
 
-### UI/UX Design
-- Capture & Enhance view
-- Project Folder View
-- File Details & Edit screen
-- Search feature to retrieve files instantly by name or project
+  Cloud Storage & Sync
+   - Supabase-powered backend for secure document storage
+   - Real-time synchronization between devices
+   - Automatic backup and recovery
+   - Secure authentication and authorization
+   - Project-based file organization
 
-## Technical Specifications
+  Cross-Platform Access
+   - Web interface accessible via ESP32's local server
+   - QR code integration for instant project access
+   - File preview and download capabilities
+   - Multi-device synchronization
 
-### Platform
-- Android (Target SDK 21+)
+  Technical Architecture:
 
-### Storage
-- `sqflite` for metadata indexing (project names, dates, document types)
-- Local storage for actual PDF/JPEG files using `path_provider` and `dart:io`
+  Web Application Stack:
+   - Framework: Flutter Web (Dart)
+   - State Management: Built-in Flutter patterns
+   - UI Components: Responsive design for mobile and desktop
+   - Connectivity: WiFi-based communication with ESP32 devices
 
-### Offline First
-- All features work without an internet connection
-- Files stored locally on the device
+  ESP32 Firmware:
+   - Platform: ESP-IDF / Arduino Framework
+   - Storage: SD card integration for local file storage
+   - Networking: WiFi with static IP configuration
+   - Protocols: HTTP server for web interface, Supabase API integration
+   - Features: File synchronization, QR code generation, project management
 
-## Architecture
+  Backend Services:
+   - Database: Supabase (PostgreSQL)
+   - Storage: Supabase Storage for document management
+   - Authentication: Supabase Auth
+   - Real-time: Supabase Realtime for live synchronization
+   - Security: Row Level Security (RLS) policies
 
-The app follows a clean architecture pattern with:
-- Services layer for business logic
-- Models for data representation
-- Screens for UI components
-- Utils for helper functions
+  Use Cases:
+   - Construction companies managing multiple project sites
+   - Field inspectors documenting site conditions
+   - Project managers tracking progress across multiple locations
+   - Quality assurance teams performing compliance checks
+   - Maintenance crews accessing historical project data
 
-## Dependencies
+  Access Methods:
+   1. Web Interface: Access via WiFi connection to ESP32 device
+   2. QR Code Access: Scan project QR codes for instant access
+   3. Cloud Dashboard: Supabase-based management interface
 
-- `google_mlkit_document_scanner`: For document scanning
-- `image`: For image processing
-- `pdf` and `printing`: For PDF generation
-- `path_provider`: For file system access
-- `qr_flutter`: For QR code generation
-- `sqflite`: For local database
-- `provider`: For state management
+  Project Organization:
+   - Projects: Top-level containers for each inspection site
+   - Categories: Organized file types (Blueprints, Photos, Reports, etc.)
+   - Sync Status: Real-time indication of cloud synchronization status
+   - Access Control: Role-based permissions for team collaboration
 
-## Getting Started
+  Development Focus:
+   - Reliability: Stable ESP32 firmware with proper error handling
+   - Performance: Optimized file transfer and sync mechanisms
+   - Scalability: Designed to handle multiple projects and users
+   - Security: End-to-end encryption and secure authentication
+   - Usability: Intuitive interfaces for both technical and non-technical users
 
-1. Clone the repository
-2. Run `flutter pub get` to install dependencies
-3. Connect an Android device or start an emulator
-4. Run `flutter run` to launch the app
+  Synchronization Flow:
+   1. Field data captured and stored locally on ESP32
+   2. ESP32 periodically syncs with Supabase cloud storage
+   3. Team members access synchronized files via web interface
+   4. QR codes enable quick access to project-specific data
 
-## Testing
+  Data Management:
+   - Local Storage: SD card on ESP32 for offline access
+   - Cloud Storage: Supabase for centralized management
+   - File Types: Support for images, PDFs, documents, and technical drawings
+   - Metadata: Automatic tagging and categorization of files
+   - Retention: Configurable retention policies for different file types
 
-The app is designed to work completely offline. All data is stored locally on the device, ensuring functionality without internet connectivity.# Inspectra
+  Security Features:
+   - Encrypted communication between all components
+   - Secure authentication with Supabase Auth
+   - Role-based access control
+   - Audit trails for file access and modifications
+   - Protected local storage on ESP32 devices

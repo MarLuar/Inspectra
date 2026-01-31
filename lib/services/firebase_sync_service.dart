@@ -1,14 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import '../models/project_model.dart'; // Contains both Project and Document models
+import 'supabase_storage_service.dart';
+import 'database_service.dart';
 
 class FirebaseSyncService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final SupabaseStorageService _supabaseStorage = SupabaseStorageService();
+  SupabaseStorageService get supabaseStorage => _supabaseStorage;
 
   // Reference to user's data in Firestore
   CollectionReference get _usersCollection => _firestore.collection('users');
@@ -66,6 +68,8 @@ class FirebaseSyncService {
       'document_count': project.documentCount,
       'location': project.location,
       'user_id': currentUserId,
+      'owner_user_id': project.ownerUserId ?? currentUserId,
+      'is_shared': project.isShared,
     });
   }
 
@@ -75,10 +79,10 @@ class FirebaseSyncService {
       throw Exception('User not authenticated');
     }
 
-    // Upload file to Firebase Storage first
+    // Upload file to Supabase Storage first
     String? downloadUrl;
     if (document.path.isNotEmpty) {
-      downloadUrl = await _uploadFileToStorage(document.path, document.id);
+      downloadUrl = await _uploadFileToSupabase(document.path, document.id);
     }
 
     await _documentsCollection.doc(document.id).set({
@@ -90,40 +94,51 @@ class FirebaseSyncService {
       'created_at': Timestamp.fromDate(document.createdAt),
       'file_type': document.fileType,
       'user_id': currentUserId,
+      'owner_user_id': document.ownerUserId ?? currentUserId,
+      'is_shared': document.isShared,
+      'qr_code_path': document.qrCodePath,
     });
   }
 
-  // Upload file to Firebase Storage
-  Future<String?> _uploadFileToStorage(String localPath, String documentId) async {
+  // Upload file to Supabase Storage
+  Future<String?> _uploadFileToSupabase(String localPath, String documentId) async {
     try {
       if (!await File(localPath).exists()) {
         return null;
       }
 
-      final file = File(localPath);
-      final ref = _storage.ref().child('documents/$currentUserId/$documentId');
-      
-      await ref.putFile(file);
-      final downloadUrl = await ref.getDownloadURL();
-      
-      return downloadUrl;
+      // Get the document to retrieve its project ID and then get the project name
+      final DatabaseService dbService = DatabaseService();
+      final Document? document = await dbService.getDocumentById(documentId);
+
+      String? projectName;
+      if (document != null) {
+        final Project? project = await dbService.getProjectById(document.projectId);
+        projectName = project?.name;
+      }
+
+      final fileName = localPath.split('/').last;
+      return await _supabaseStorage.uploadFile(
+        localPath,
+        fileName,
+        userId: currentUserId,
+        projectId: document?.projectId,
+        projectName: projectName,
+        category: document?.category,
+        documentName: document?.name,
+      );
     } catch (e) {
-      print('Error uploading file to Firebase Storage: $e');
+      print('Error uploading file to Supabase: $e');
       return null;
     }
   }
 
-  // Download file from Firebase Storage
-  Future<String?> downloadFileFromStorage(String downloadUrl, String fileName) async {
+  // Download file from Supabase Storage
+  Future<String?> downloadFileFromSupabase(String fileUrl, String fileName) async {
     try {
-      final ref = _storage.refFromURL(downloadUrl);
-      final dir = await getApplicationDocumentsDirectory();
-      final filePath = '${dir.path}/$fileName';
-      
-      await ref.writeToFile(File(filePath));
-      return filePath;
+      return await _supabaseStorage.downloadFile(fileUrl, fileName);
     } catch (e) {
-      print('Error downloading file from Firebase Storage: $e');
+      print('Error downloading file from Supabase: $e');
       return null;
     }
   }
@@ -147,6 +162,34 @@ class FirebaseSyncService {
           qrCodePath: data['qr_code_path'],
           documentCount: data['document_count'] ?? 0,
           location: data['location'],
+          ownerUserId: data['owner_user_id'],
+          isShared: data['is_shared'] ?? 0,
+        );
+      }).toList();
+    });
+  }
+
+  // Get all projects accessible to current user (owned + shared)
+  Stream<List<Project>> getAccessibleProjects() {
+    if (!isAuthenticated) {
+      throw Exception('User not authenticated');
+    }
+
+    // First get user's own projects
+    var query = _projectsCollection.where('user_id', isEqualTo: currentUserId);
+
+    return query.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return Project(
+          id: data['id'] ?? '',
+          name: data['name'] ?? '',
+          createdAt: (data['created_at'] as Timestamp).toDate(),
+          qrCodePath: data['qr_code_path'],
+          documentCount: data['document_count'] ?? 0,
+          location: data['location'],
+          ownerUserId: data['owner_user_id'],
+          isShared: data['is_shared'] ?? 0,
         );
       }).toList();
     });
@@ -173,6 +216,9 @@ class FirebaseSyncService {
           category: data['category'] ?? '',
           createdAt: (data['created_at'] as Timestamp).toDate(),
           fileType: data['file_type'] ?? '',
+          ownerUserId: data['owner_user_id'],
+          isShared: data['is_shared'] ?? 0,
+          qrCodePath: data['qr_code_path'],
         );
       }).toList();
     });
@@ -202,6 +248,18 @@ class FirebaseSyncService {
   Future<void> deleteDocument(String documentId) async {
     if (!isAuthenticated) {
       throw Exception('User not authenticated');
+    }
+
+    // First get the document to retrieve its path for file deletion
+    final docSnapshot = await _documentsCollection.doc(documentId).get();
+    if (docSnapshot.exists) {
+      final documentData = docSnapshot.data() as Map<String, dynamic>?;
+      final path = documentData?['path'] as String?;
+
+      // Delete the file from Supabase regardless of whether it's a URL or direct path
+      if (path != null) {
+        await _supabaseStorage.deleteFile(path);
+      }
     }
 
     await _documentsCollection.doc(documentId).delete();

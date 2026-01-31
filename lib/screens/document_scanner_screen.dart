@@ -149,9 +149,11 @@ class _DocumentScannerScreenState extends State<DocumentScannerScreen> {
       final projects = await projectService.getAllProjects();
 
       if (projects.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No projects available. Please create a project first.')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No projects available. Please create a project first.')),
+          );
+        }
         return;
       }
 
@@ -329,16 +331,20 @@ class _DocumentScannerScreenState extends State<DocumentScannerScreen> {
               fileType: 'image',
             );
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Saved to project: $projectName')),
-            );
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Saved to project: $projectName')),
+              );
+            }
           }
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving to project: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving to project: $e')),
+        );
+      }
     }
   }
 

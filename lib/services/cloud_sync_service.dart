@@ -203,6 +203,24 @@ class CloudSyncService {
     };
   }
 
+  // Delete a document from cloud
+  Future<void> deleteDocumentFromCloud(String documentId) async {
+    if (!isAuthenticated) {
+      throw Exception('User not authenticated');
+    }
+
+    await _firebaseService.deleteDocument(documentId);
+  }
+
+  // Delete a project from cloud
+  Future<void> deleteProjectFromCloud(String projectId) async {
+    if (!isAuthenticated) {
+      throw Exception('User not authenticated');
+    }
+
+    await _firebaseService.deleteProject(projectId);
+  }
+
   // Manual sync trigger
   Future<void> manualSync() async {
     if (!isAuthenticated) {

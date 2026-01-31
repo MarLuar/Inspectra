@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io' show IOException, FileSystemException;
 import '../services/project_organization_service.dart';
 import '../models/project_model.dart';
 import 'project_detail_screen.dart';
@@ -25,17 +26,35 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
   Future<void> _loadProjects() async {
     try {
       final projects = await _projectService.getAllProjects();
-      setState(() {
-        _projects = projects;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading projects: $e')),
-      );
+      if (mounted) {
+        setState(() {
+          _projects = projects;
+          _isLoading = false;
+        });
+      }
+    } catch (e, stackTrace) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      print('Error loading projects: $e');
+      print('Stack trace: $stackTrace');
+
+      String errorMessage = 'Error loading projects: ';
+      if (e is FileSystemException) {
+        errorMessage += 'File system error occurred.';
+      } else if (e is IOException) {
+        errorMessage += 'Connection or IO error occurred.';
+      } else {
+        errorMessage += e.toString();
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
     }
   }
 
@@ -125,7 +144,7 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Folders', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text('All Folders', style: TextStyle(fontWeight: FontWeight.w700)),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
@@ -176,7 +195,7 @@ class _ProjectsListScreenState extends State<ProjectsListScreen> {
           : _projects.isEmpty
               ? const Center(
                   child: Text(
-                    'No folders yet.\nTap the + button to create one.',
+                    'No accessible folders yet.\nTap the + button to create one.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),

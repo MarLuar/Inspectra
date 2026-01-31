@@ -1,7 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-class TechnicalDetailsScreen extends StatelessWidget {
+class TechnicalDetailsScreen extends StatefulWidget {
   const TechnicalDetailsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<TechnicalDetailsScreen> createState() => _TechnicalDetailsScreenState();
+}
+
+class _TechnicalDetailsScreenState extends State<TechnicalDetailsScreen> {
+  PackageInfo? _packageInfo;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPackageInfo();
+  }
+
+  Future<void> _loadPackageInfo() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      setState(() {
+        _packageInfo = packageInfo;
+      });
+    } catch (e) {
+      print('Failed to load package info: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +49,9 @@ class TechnicalDetailsScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.blue),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Current Version: 1.03',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                Text(
+                  'Current Version: ${_packageInfo?.version ?? '1.03'}',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 24),
                 

@@ -3,9 +3,11 @@ import 'dart:io';
 import '../services/project_organization_service.dart';
 import '../services/qr_code_generator_service.dart';
 import '../services/document_sharing_service.dart';
+import '../services/esp32_communication_service.dart';
 import '../models/project_model.dart';
 import 'category_detail_screen.dart';
 import 'document_detail_screen.dart';
+import 'esp32_transfer_screen.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   final String? projectName;
@@ -132,6 +134,16 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   ],
                 ),
               ),
+              PopupMenuItem(
+                value: 'send_to_esp32',
+                child: Row(
+                  children: [
+                    Icon(Icons.memory, color: Colors.orange),
+                    SizedBox(width: 8),
+                    Text('Send to ESP32', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w500)),
+                  ],
+                ),
+              ),
             ],
             onSelected: (value) {
               if (value == 'delete') {
@@ -142,6 +154,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                 _renameFolder();
               } else if (value == 'add_location') {
                 _addLocation();
+              } else if (value == 'send_to_esp32') {
+                _sendToEsp32();
               }
             },
           ),
@@ -253,7 +267,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                           ),
                           const SizedBox(height: 8),
                           FutureBuilder<List<Document>>(
-                            future: _projectService.getDocumentsForProject(_currentProject!.id),
+                            future: _currentProject != null && _currentProject!.id.isNotEmpty
+                                ? _projectService.getDocumentsForProject(_currentProject!.id)
+                                : Future.value([]),
                             builder: (context, snapshot) {
                               final count = snapshot.data?.length ?? 0;
                               return Text(
@@ -316,7 +332,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       child: Center(child: CircularProgressIndicator()),
                     )
                   : FutureBuilder<List<Document>>(
-                      future: _projectService.getDocumentsForProject(_currentProject!.id),
+                      future: _currentProject != null && _currentProject!.id.isNotEmpty
+                          ? _projectService.getDocumentsForProject(_currentProject!.id)
+                          : Future.value([]),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const Padding(
@@ -594,6 +612,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           createdAt: project.createdAt,
           qrCodePath: project.qrCodePath,
           documentCount: project.documentCount,
+          location: project.location, // Preserve location
+          ownerUserId: project.ownerUserId, // Preserve owner user ID
+          isShared: project.isShared, // Preserve shared status
         );
 
         await _projectService.updateProject(updatedProject);
@@ -696,6 +717,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           qrCodePath: project.qrCodePath,
           documentCount: project.documentCount,
           location: result.isEmpty ? null : result, // Store null if empty
+          ownerUserId: project.ownerUserId, // Preserve owner user ID
+          isShared: project.isShared, // Preserve shared status
         );
 
         await _projectService.updateProject(updatedProject);
@@ -951,6 +974,16 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           ],
         );
       },
+    );
+  }
+
+  void _sendToEsp32() {
+    // Navigate to ESP32 transfer screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Esp32TransferScreen(projectName: widget.projectName),
+      ),
     );
   }
 }

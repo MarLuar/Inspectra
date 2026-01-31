@@ -5,6 +5,8 @@ class Project {
   final String? qrCodePath;
   final int documentCount;
   final String? location; // Added location field
+  final String? ownerUserId; // Added owner user ID
+  final int isShared; // Added shared flag
 
   Project({
     required this.id,
@@ -13,6 +15,8 @@ class Project {
     this.qrCodePath,
     this.documentCount = 0,
     this.location, // Added location parameter
+    this.ownerUserId, // Added owner user ID parameter
+    this.isShared = 0, // Added shared flag parameter with default value
   });
 
   Map<String, dynamic> toJson() {
@@ -23,6 +27,8 @@ class Project {
       'qr_code_path': qrCodePath,
       'document_count': documentCount,
       'location': location, // Added location to JSON
+      'owner_user_id': ownerUserId, // Added owner user ID to JSON
+      'is_shared': isShared, // Added shared flag to JSON
     };
   }
 
@@ -34,6 +40,8 @@ class Project {
       qrCodePath: json['qr_code_path'],
       documentCount: json['document_count'] ?? 0,
       location: json['location'], // Added location from JSON
+      ownerUserId: json['owner_user_id'], // Added owner user ID from JSON
+      isShared: json['is_shared'] ?? 0, // Added shared flag from JSON
     );
   }
 
@@ -46,6 +54,8 @@ class Project {
       'qr_code_path': qrCodePath,
       'document_count': documentCount,
       'location': location,
+      'owner_user_id': ownerUserId,
+      'is_shared': isShared,
     };
   }
 
@@ -58,6 +68,8 @@ class Project {
       qrCodePath: data['qr_code_path'],
       documentCount: data['document_count'] ?? 0,
       location: data['location'],
+      ownerUserId: data['owner_user_id'],
+      isShared: data['is_shared'] ?? 0,
     );
   }
 }
@@ -71,6 +83,8 @@ class Document {
   final DateTime createdAt;
   final String fileType; // 'image' or 'pdf'
   final String? qrCodePath; // Path to the QR code image file
+  final String? ownerUserId; // Added owner user ID
+  final int isShared; // Added shared flag
 
   Document({
     required this.id,
@@ -81,6 +95,8 @@ class Document {
     required this.createdAt,
     required this.fileType,
     this.qrCodePath,
+    this.ownerUserId, // Added owner user ID parameter
+    this.isShared = 0, // Added shared flag parameter with default value
   });
 
   Map<String, dynamic> toJson() {
@@ -93,6 +109,8 @@ class Document {
       'created_at': createdAt.millisecondsSinceEpoch,
       'file_type': fileType,
       'qr_code_path': qrCodePath,
+      'owner_user_id': ownerUserId, // Added owner user ID to JSON
+      'is_shared': isShared, // Added shared flag to JSON
     };
   }
 
@@ -106,6 +124,8 @@ class Document {
       createdAt: DateTime.fromMillisecondsSinceEpoch(json['created_at']),
       fileType: json['file_type'],
       qrCodePath: json['qr_code_path'],
+      ownerUserId: json['owner_user_id'], // Added owner user ID from JSON
+      isShared: json['is_shared'] ?? 0, // Added shared flag from JSON
     );
   }
 
@@ -120,6 +140,8 @@ class Document {
       'created_at': createdAt.millisecondsSinceEpoch,
       'file_type': fileType,
       'qr_code_path': qrCodePath,
+      'owner_user_id': ownerUserId, // Added owner user ID to JSON
+      'is_shared': isShared, // Added shared flag to JSON
     };
   }
 
@@ -134,6 +156,8 @@ class Document {
       createdAt: DateTime.fromMillisecondsSinceEpoch(data['created_at'] ?? DateTime.now().millisecondsSinceEpoch),
       fileType: data['file_type'] ?? '',
       qrCodePath: data['qr_code_path'],
+      ownerUserId: data['owner_user_id'], // Added owner user ID from JSON
+      isShared: data['is_shared'] ?? 0, // Added shared flag from JSON
     );
   }
 }

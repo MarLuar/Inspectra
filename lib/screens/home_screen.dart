@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../services/cloud_sync_service.dart';
 import 'document_scanner_screen.dart';
 import '../screens/projects_list_screen.dart';
@@ -16,11 +17,24 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final CloudSyncService _cloudSyncService = CloudSyncService();
   Map<String, dynamic>? _syncStatus;
+  PackageInfo? _packageInfo;
 
   @override
   void initState() {
     super.initState();
     _loadSyncStatus();
+    _loadPackageInfo();
+  }
+
+  Future<void> _loadPackageInfo() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      setState(() {
+        _packageInfo = packageInfo;
+      });
+    } catch (e) {
+      print('Failed to load package info: $e');
+    }
   }
 
   Future<void> _loadSyncStatus() async {
@@ -79,10 +93,10 @@ class _HomeScreenState extends State<HomeScreen> {
               PopupMenuItem<String>(
                 value: 'version',
                 child: Row(
-                  children: const [
-                    Icon(Icons.info, color: Colors.blue),
-                    SizedBox(width: 8),
-                    Text('Version 1.03'),
+                  children: [
+                    const Icon(Icons.info, color: Colors.blue),
+                    const SizedBox(width: 8),
+                    Text('Version ${_packageInfo?.version ?? '1.03'}'),
                   ],
                 ),
               ),
@@ -196,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     icon: const Icon(Icons.folder),
-                    label: Text('View Folders', style: TextStyle(fontWeight: FontWeight.w600)),
+                    label: Text('View All Folders', style: TextStyle(fontWeight: FontWeight.w600)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,

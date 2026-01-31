@@ -1,4 +1,4 @@
-# InSpectra Project Folder Structure
+	# InSpectra Project Folder Structure
 
 This document explains the purpose of each folder in the InSpectra project structure.
 

@@ -92,6 +92,9 @@ dependencies:
   supabase_flutter: ^2.5.5
   google_fonts: ^6.3.2
 
+  # Screenshot prevention
+  flutter_secure_application: ^3.0.0
+
 
 dev_dependencies:
   flutter_test:

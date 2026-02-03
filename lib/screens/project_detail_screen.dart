@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/project_organization_service.dart';
 import '../services/qr_code_generator_service.dart';
 import '../services/document_sharing_service.dart';
 import '../services/esp32_communication_service.dart';
+import '../services/viewer_tracking_service.dart';
 import '../models/project_model.dart';
+import '../models/viewer_tracking_model.dart';
 import 'category_detail_screen.dart';
 import 'document_detail_screen.dart';
 import 'esp32_transfer_screen.dart';
@@ -21,7 +24,8 @@ class ProjectDetailScreen extends StatefulWidget {
 class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   final ProjectOrganizationService _projectService = ProjectOrganizationService();
   final QrCodeGeneratorService _qrService = QrCodeGeneratorService();
-  
+  final ViewerTrackingService _viewerTrackingService = ViewerTrackingService();
+
   // Removed _documents list since we're now using FutureBuilder to load documents
   bool _isLoading = true;
   String? _qrCodePath;
@@ -32,6 +36,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   void initState() {
     super.initState();
     _loadProjectDetails();
+    _trackProjectView();
   }
 
   Future<void> _loadProjectDetails() async {
@@ -69,6 +74,22 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading project details: $e')),
       );
+    }
+  }
+
+  // Method to track when a user views this project
+  Future<void> _trackProjectView() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null && _currentProject != null) {
+        await _viewerTrackingService.trackProjectView(
+          projectId: _currentProject!.id,
+          viewerUserId: currentUser.uid,
+          viewerName: currentUser.displayName ?? currentUser.email ?? 'Anonymous User',
+        );
+      }
+    } catch (e) {
+      print('Error tracking project view: $e');
     }
   }
 
@@ -425,6 +446,66 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                         );
                       },
                     ),
+              // Recent Viewers section
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: StreamBuilder<List<ViewerTracking>>(
+                  stream: _currentProject != null
+                      ? _viewerTrackingService.getRecentViewersForProject(_currentProject!.id)
+                      : Stream.value([]),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                      final viewers = snapshot.data!;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Recent Viewers',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey[300]!),
+                            ),
+                            child: Column(
+                              children: viewers.take(5).map((viewer) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.visibility, size: 16, color: Colors.blue[300]),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          '${viewer.viewerName} • ${_formatDateTime(viewer.viewTime)}',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey[700],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ],
+                      );
+                    } else {
+                      return const SizedBox.shrink(); // Hide section if no viewers
+                    }
+                  },
+                ),
+              ),
             ],
           ),
         ),

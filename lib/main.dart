@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_secure_application/flutter_secure_application.dart';
 import 'config/firebase_config.dart';
 import 'config/supabase_config.dart';
 import 'screens/auth_screen.dart';
@@ -30,7 +31,11 @@ void main() async {
   final storageService = SupabaseStorageService();
   await storageService.initializeBucket();
 
-  runApp(const InSpectraApp());
+  runApp(
+    FlutterSecureApplication(
+      child: const InSpectraApp(),
+    ),
+  );
 }
 
 class InSpectraApp extends StatelessWidget {
